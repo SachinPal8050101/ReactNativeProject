@@ -64,7 +64,12 @@ const MainApp = () => {
       <TouchableOpacity
         onPress={submitForm}
         disabled={loading || Boolean(mobileNumberError.length)}
-        style={styles.btn}>
+        style={[
+          styles.btn,
+          loading || Boolean(mobileNumberError.length)
+            ? {backgroundColor: 'gray'}
+            : null,
+        ]}>
         {loading ? (
           <ActivityIndicator color={'white'} />
         ) : (
