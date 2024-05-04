@@ -1,6 +1,6 @@
 import {SafeAreaView, StyleSheet} from 'react-native';
 import React from 'react';
-import MainApp from './android/src';
+import MainApp from './src';
 
 const App = () => {
   return (
