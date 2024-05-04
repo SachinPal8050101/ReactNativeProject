@@ -53,7 +53,7 @@ const MainApp = () => {
         keyboardType={'phone-pad'}
         isError={mobileNumberError}
         onChangeText={val => {
-          if (val.length > 4 && !validateMobileNumber(val)) {
+          if (!validateMobileNumber(val)) {
             setMobileNumberError('Please enter valid number');
           } else {
             setMobileNumberError('');
