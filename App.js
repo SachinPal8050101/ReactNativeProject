@@ -1,11 +1,11 @@
 import {SafeAreaView, StyleSheet} from 'react-native';
 import React from 'react';
-import MainApp from './src';
+import MainCom from './src/common/MainCom';
 
 const App = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <MainApp />
+      <MainCom />
     </SafeAreaView>
   );
 };
