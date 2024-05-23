@@ -1,11 +1,14 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {ActivityIndicator, SafeAreaView, StyleSheet} from 'react-native';
+import {ActivityIndicator, SafeAreaView, StyleSheet, Text} from 'react-native';
 
 import {useAuth0} from 'react-native-auth0';
+import {PersistGate} from 'redux-persist/integration/react';
+import {Provider} from 'react-redux';
 
 import AppNavigation from './navigations/AppNavigation';
 import {LogInContext} from './context/logInContext';
 import {clearStoreData, getStoreData, setStoreData} from './session/Storage';
+import {persistor, store} from './store';
 
 const MainApp = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -51,9 +54,21 @@ const MainApp = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <LogInContext.Provider value={{isLoggedIn, userLoggedIn, userLogOut}}>
-        <AppNavigation isLoggedIn={isLoggedIn} />
-      </LogInContext.Provider>
+      <Provider store={store}>
+        <PersistGate
+          loading={
+            <ActivityIndicator
+              style={styles.loder}
+              size={'large'}
+              color={'red'}
+            />
+          }
+          persistor={persistor}>
+          <LogInContext.Provider value={{isLoggedIn, userLoggedIn, userLogOut}}>
+            <AppNavigation isLoggedIn={isLoggedIn} />
+          </LogInContext.Provider>
+        </PersistGate>
+      </Provider>
     </SafeAreaView>
   );
 };
