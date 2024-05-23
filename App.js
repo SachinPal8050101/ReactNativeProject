@@ -1,20 +1,16 @@
-import {SafeAreaView, StyleSheet} from 'react-native';
 import React from 'react';
-import MainCom from './src/common/MainCom';
+
+import {Auth0Provider} from 'react-native-auth0';
+
+import config from './auth0-configuration';
+import MainApp from './src';
 
 const App = () => {
   return (
-    <SafeAreaView style={styles.container}>
-      <MainCom />
-    </SafeAreaView>
+    <Auth0Provider domain={config.domain} clientId={config.clientId}>
+      <MainApp />
+    </Auth0Provider>
   );
 };
 
 export default App;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-  },
-});

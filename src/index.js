@@ -1,89 +1,60 @@
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import NewTextInput from './common/TextInput.component';
-import {validateMobileNumber} from './common/commonFunction';
-import {getPhoneNumberInfo} from './api/Service';
+import React, {useCallback, useEffect, useState} from 'react';
+import {ActivityIndicator, SafeAreaView, StyleSheet} from 'react-native';
+
+import {useAuth0} from 'react-native-auth0';
+
+import AppNavigation from './navigations/AppNavigation';
+import {LogInContext} from './context/logInContext';
+import {clearStoreData, getStoreData, setStoreData} from './session/Storage';
 
 const MainApp = () => {
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState(null);
-  const [mobileNumber, setMobileNumber] = useState(null);
-  const [mobileNumberError, setMobileNumberError] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [rehydrate, setRehydrate] = useState(false);
 
-  const submitForm = () => {
-    setData(null);
-    if (!validateMobileNumber(mobileNumber)) {
-      setMobileNumberError('Required field');
-    } else {
-      // Call Api here
-      setLoading(true);
-      getPhoneNumberInfo(mobileNumber, callBackSuccess, callBackfailure);
+  const {authorize, getCredentials, clearSession} = useAuth0();
+  useEffect(() => {
+    (async () => {
+      try {
+        const accessToken = await getStoreData('AccessToken');
+        if (accessToken) {
+          setIsLoggedIn(true);
+        }
+        setRehydrate(true);
+      } catch (e) {
+        console.log('Something went wrong');
+      }
+    })();
+  }, []);
+  const userLoggedIn = useCallback(async () => {
+    try {
+      await authorize({}, {});
+      const credentials = await getCredentials();
+      await setStoreData('AccessToken', credentials?.accessToken);
+      setIsLoggedIn(true);
+    } catch (e) {
+      console.log(e);
     }
-  };
+  }, [authorize, getCredentials]);
 
-  const callBackSuccess = (d, h) => {
-    setData({...d, origin: h});
-    setLoading(false);
-  };
-  const callBackfailure = d => {
-    setData({...d, origin: ''});
-    setLoading(false);
-  };
+  const userLogOut = useCallback(async () => {
+    await clearStoreData('AccessToken');
+    await clearSession({}, {});
+    setIsLoggedIn(false);
+  }, [clearSession]);
+
+  // Untill we have not get the data from async store we will show loader
+  if (!rehydrate) {
+    return (
+      <ActivityIndicator style={styles.loder} size={'large'} color={'red'} />
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      <NewTextInput
-        containerStyle={styles.textInput}
-        label="Enter Mobile Number"
-        placeholder="Mobile Number"
-        value={mobileNumber}
-        bottomPlaceholder={
-          mobileNumberError
-            ? mobileNumberError.length === 0
-              ? 'Required field.'
-              : 'Please enter valid number'
-            : null
-        }
-        keyboardType={'phone-pad'}
-        isError={mobileNumberError}
-        onChangeText={val => {
-          if (!validateMobileNumber(val)) {
-            setMobileNumberError('Please enter valid number');
-          } else {
-            setMobileNumberError('');
-          }
-          setMobileNumber(val);
-        }}
-      />
-      <TouchableOpacity
-        onPress={submitForm}
-        disabled={loading || Boolean(mobileNumberError.length)}
-        style={[
-          styles.btn,
-          loading || Boolean(mobileNumberError.length)
-            ? {backgroundColor: 'gray'}
-            : null,
-        ]}>
-        {loading ? (
-          <ActivityIndicator color={'white'} />
-        ) : (
-          <Text style={styles.btnText}>Get Data</Text>
-        )}
-      </TouchableOpacity>
-      {data ? (
-        <View style={styles.resultCon}>
-          <Text style={styles.welText}>{data.msg}</Text>
-          <Text
-            style={styles.resultText}>{`Phone Origin - ${data.origin}`}</Text>
-        </View>
-      ) : null}
-    </View>
+    <SafeAreaView style={styles.container}>
+      <LogInContext.Provider value={{isLoggedIn, userLoggedIn, userLogOut}}>
+        <AppNavigation isLoggedIn={isLoggedIn} />
+      </LogInContext.Provider>
+    </SafeAreaView>
   );
 };
 
@@ -91,42 +62,13 @@ export default MainApp;
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: 'center',
-    // alignItems: 'center',
-    marginHorizontal: 20,
-  },
-  textInput: {
-    marginTop: 40,
-  },
-  con: {
     flex: 1,
+    backgroundColor: 'white',
   },
-  btn: {
-    backgroundColor: '#ED2D2F',
-    paddingVertical: 16,
+  loder: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 40,
-    borderRadius: 32,
-  },
-  btnText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  resultCon: {
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  welText: {
-    color: '#090A0A',
-    fontSize: 20,
-    fontWeight: '900',
-    marginBottom: 20,
-  },
-  resultText: {
-    color: '#4BAE4F',
-    fontSize: 15,
-    fontWeight: '600',
+    backgroundColor: 'white',
   },
 });

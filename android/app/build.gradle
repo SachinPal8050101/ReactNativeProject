@@ -77,10 +77,12 @@ android {
     namespace "com.reactnativeproject"
     defaultConfig {
         applicationId "com.reactnativeproject"
+        manifestPlaceholders = [auth0Domain: "dev-wum5vbym4jzdm2tn.us.auth0.com", auth0Scheme: "${applicationId}.auth0"]
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        manifestPlaceholders = [auth0Domain: "dev-wum5vbym4jzdm2tn.us.auth0.com", auth0Scheme: "${applicationId}.auth0"]
     }
     signingConfigs {
         debug {
