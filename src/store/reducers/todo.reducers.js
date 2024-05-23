@@ -1,4 +1,9 @@
-import {ADD_TODO, DELETE_TASK, TASK_COMPLETED} from '../types/todo.types';
+import {
+  ADD_TODO,
+  DELETE_TASK,
+  TASK_COMPLETED,
+  UPDATE_TODO,
+} from '../types/todo.types';
 
 const initialState = {
   todos: [],
@@ -32,6 +37,20 @@ const todoReducer = (state = initialState, action) => {
       return {
         ...state,
         todos: state.todos.filter(todo => todo.id !== action.payload.id),
+      };
+    }
+    case UPDATE_TODO: {
+      return {
+        ...state,
+        todos: state.todos.map(todo =>
+          todo.id === action.payload.id
+            ? {
+                ...todo,
+                title: action.payload.title,
+                subTitle: action.payload.subTitle,
+              }
+            : todo,
+        ),
       };
     }
     default:

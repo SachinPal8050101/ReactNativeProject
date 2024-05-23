@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
   noteText: {
     alignSelf: 'center',
     marginBottom: 20,
-    color: 'Black',
+    color: 'red',
     fontWeight: '900',
     fontSize: 17,
   },

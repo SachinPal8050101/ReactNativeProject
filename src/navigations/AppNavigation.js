@@ -12,7 +12,7 @@ const Stack = createNativeStackNavigator();
 const AppNavigation = ({isLoggedIn = false}) => {
   return (
     <NavigationContainer>
-      {isLoggedIn ? (
+      {!isLoggedIn ? (
         <Stack.Navigator>
           <Stack.Screen
             options={{headerShown: false}}

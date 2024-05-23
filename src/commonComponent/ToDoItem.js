@@ -4,9 +4,14 @@ import CheckBox from 'react-native-check-box';
 import {useDispatch} from 'react-redux';
 import {deleteTask, taskCompeted} from '../store/actions/todo.action';
 import {deleteIcon} from '../../assets/icons';
-// dipatch(taskCompeted({isCompleted: !isDone, index: id}))
 
-const ToDoItem = ({id, isDone = true, title = '', subTitle = ''}) => {
+const ToDoItem = ({
+  id,
+  isDone = true,
+  title = '',
+  subTitle = '',
+  onPress = () => {},
+}) => {
   const dipatch = useDispatch();
 
   const onCheckBoxClick = () => {
@@ -25,10 +30,10 @@ const ToDoItem = ({id, isDone = true, title = '', subTitle = ''}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <Pressable onPress={() => onPress(id)} style={styles.container}>
       <CheckBox onClick={onCheckBoxClick} isChecked={isDone} />
       <View style={styles.subCon}>
-        <View>
+        <View style={{marginRight: 10, flex: 1}}>
           <Text style={[styles.title, isDone ? styles.checkedStyle : null]}>
             {title}
           </Text>
@@ -38,7 +43,7 @@ const ToDoItem = ({id, isDone = true, title = '', subTitle = ''}) => {
           <Image style={styles.deleteIconStyle} source={deleteIcon} />
         </Pressable>
       </View>
-    </View>
+    </Pressable>
   );
 };
 

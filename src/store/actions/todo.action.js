@@ -1,4 +1,9 @@
-import {ADD_TODO, DELETE_TASK, TASK_COMPLETED} from '../types/todo.types';
+import {
+  ADD_TODO,
+  DELETE_TASK,
+  TASK_COMPLETED,
+  UPDATE_TODO,
+} from '../types/todo.types';
 
 export const addTodo = task => ({
   type: ADD_TODO,
@@ -13,4 +18,9 @@ export const taskCompeted = id => ({
 export const deleteTask = id => ({
   type: DELETE_TASK,
   payload: {id},
+});
+
+export const updateToDo = task => ({
+  type: UPDATE_TODO,
+  payload: task,
 });

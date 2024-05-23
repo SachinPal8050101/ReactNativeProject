@@ -1,19 +1,17 @@
 import {FlatList, Image, Pressable, StyleSheet, Text, View} from 'react-native';
-import React, {useCallback, useContext} from 'react';
-import {LogInContext} from '../context/logInContext';
+import React, {useContext} from 'react';
 import Header from '../commonComponent/Header';
-import {backIcon, floatingIcon} from '../../assets/icons';
+import {floatingIcon} from '../../assets/icons';
 import {useSelector} from 'react-redux';
 import ToDoItem from '../commonComponent/ToDoItem';
+import {LogInContext} from '../context/logInContext';
 
 const ToDoScreen = props => {
   const {navigation} = props;
-
+  const logInContext = useContext(LogInContext);
   const todoList = useSelector(state => state.todos);
-  console.log('==<>>>', todoList);
 
   const renderToDoItem = ({item, index}) => {
-    console.log('item ==>>', item);
     const {title = '', subTitle = '', isCompleted, id} = item;
     return (
       <ToDoItem
@@ -22,12 +20,14 @@ const ToDoScreen = props => {
         isDone={isCompleted}
         title={title}
         subTitle={subTitle}
+        onPress={taskId => navigateToCreateScreen(true, taskId)}
       />
     );
   };
 
-  const navigateToCreateScreen = () => {
-    navigation.navigate('ToDoCreate');
+  const navigateToCreateScreen = (isUpdate, id = '') => {
+    const params = {isUpdate: isUpdate ? true : false, id: id};
+    navigation.navigate('ToDoCreate', params);
   };
 
   return (
@@ -42,7 +42,12 @@ const ToDoScreen = props => {
           renderItem={renderToDoItem}
         />
       )}
-      <Pressable onPress={navigateToCreateScreen} style={styles.floatingIcon}>
+      <Pressable style={{marginBottom: 50}} onPress={logInContext.userLogOut}>
+        <Text style={styles.logOUtStyle}>Log Out</Text>
+      </Pressable>
+      <Pressable
+        onPress={() => navigateToCreateScreen(false, '')}
+        style={styles.floatingIcon}>
         <Image source={floatingIcon} style={styles.iconStyle} />
       </Pressable>
     </View>
@@ -71,6 +76,13 @@ const styles = StyleSheet.create({
   emptyTextStyle: {
     alignSelf: 'center',
     marginTop: 40,
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#404446',
+  },
+  logOUtStyle: {
+    alignSelf: 'center',
+    marginTop: 20,
     fontSize: 20,
     fontWeight: '900',
     color: '#404446',
