@@ -1,5 +1,13 @@
-import {View, Text, StyleSheet, Pressable, Image, Alert} from 'react-native';
-import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  Image,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
+import React, {useState} from 'react';
 import CheckBox from 'react-native-check-box';
 import {useDispatch} from 'react-redux';
 import {deleteTask, taskCompeted} from '../store/actions/todo.action';
@@ -11,8 +19,10 @@ const ToDoItem = ({
   title = '',
   subTitle = '',
   onPress = () => {},
+  filePath = '',
 }) => {
   const dipatch = useDispatch();
+  const [loading, setLoading] = useState(true);
 
   const onCheckBoxClick = () => {
     dipatch(taskCompeted(id));
@@ -39,6 +49,15 @@ const ToDoItem = ({
           </Text>
           <Text style={styles.subTitle}>{subTitle}</Text>
         </View>
+        {loading && (
+          <ActivityIndicator style={styles.loader} size="small" color="red" />
+        )}
+        <Image
+          onLoadStart={() => setLoading(true)}
+          onLoadEnd={() => setLoading(false)}
+          style={styles.img}
+          source={{uri: filePath}}
+        />
         <Pressable onPress={deleteTodo}>
           <Image style={styles.deleteIconStyle} source={deleteIcon} />
         </Pressable>
@@ -83,5 +102,15 @@ const styles = StyleSheet.create({
   deleteIconStyle: {
     height: 25,
     width: 25,
+  },
+  img: {
+    height: 35,
+    width: 35,
+    marginRight: 10,
+    borderRadius: 8,
+  },
+  loader: {
+    position: 'absolute',
+    right: 40,
   },
 });

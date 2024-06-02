@@ -1,4 +1,6 @@
 import {
+  ActivityIndicator,
+  Alert,
   Image,
   Pressable,
   StyleSheet,
@@ -7,24 +9,34 @@ import {
   View,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
+
+import {launchImageLibrary} from 'react-native-image-picker';
+
 import Header from '../commonComponent/Header';
-import {floatingIcon, rightIcon} from '../../assets/icons';
+import {rightIcon} from '../../assets/icons';
 import {useDispatch, useSelector} from 'react-redux';
 import {addTodo, updateToDo} from '../store/actions/todo.action';
+import {usePermission} from '../imageCapture/customHook';
+import {uploadImageToServer} from '../api/Service';
 
 const ToDoCreate = props => {
   const [data, setData] = useState({
     title: '',
     subTitle: '',
+    filePath: '',
   });
   const {navigation, route} = props;
   const {isUpdate = false, id = ''} = route.params;
   const tasks = useSelector(state => state.todos);
+  const [fileResponse, setfileResponse] = useState(null);
+  const [loader, setLoader] = useState(false);
+  const [isImgLoading, setIsImgLoading] = useState(false);
+  const permissionStatus = usePermission();
 
   useEffect(() => {
     if (isUpdate) {
-      const {title, subTitle} = tasks.find(item => item.id === id);
-      setData({title, subTitle});
+      const {title, subTitle, filePath} = tasks.find(item => item.id === id);
+      setData({title, subTitle, filePath});
     }
   }, [id, isUpdate, tasks]);
 
@@ -39,14 +51,62 @@ const ToDoCreate = props => {
     });
   };
 
-  const taskAdded = () => {
-    if (!isUpdate) {
-      dipatch(addTodo(data));
-    } else {
-      dipatch(updateToDo({...data, id: id}));
-    }
+  const callbackSuccess = apiData => {
+    console.log('dataaaa', data, apiData);
+    dipatch(addTodo({...data, filePath: apiData.kraked_url}));
+    setLoader(false);
     navigation.goBack();
   };
+
+  const callbackFailure = err => {
+    console.log('errooooodsdsd', err);
+    Alert.alert('oppps Something whet wrong Image Could not save');
+    dipatch(addTodo({...data, filePath: ''}));
+    setLoader(false);
+    navigation.goBack();
+  };
+
+  const taskAdded = () => {
+    setLoader(true);
+    if (!isUpdate) {
+      if (fileResponse) {
+        uploadImageToServer(fileResponse, callbackSuccess, callbackFailure);
+      } else {
+        callbackFailure();
+      }
+    } else {
+      dipatch(updateToDo({...data, id: id}));
+      setLoader(false);
+      navigation.goBack();
+    }
+  };
+
+  const captureImage = async () => {
+    if (permissionStatus) {
+      let options = {
+        title: 'Select Image',
+        storageOptions: {
+          skipBackup: true,
+          path: 'images',
+        },
+      };
+      launchImageLibrary(options, response => {
+        console.log('Response = ', response);
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else {
+          console.log('response', JSON.stringify(response));
+          setfileResponse(response);
+          setData(prev => {
+            return {...prev, filePath: response.assets[0].uri};
+          });
+        }
+      });
+    } else {
+      Alert.alert('Permission Required');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Header
@@ -71,6 +131,31 @@ const ToDoCreate = props => {
           placeholder="Enter Task Description"
           placeholderTextColor={'#404446'}
         />
+        {!fileResponse && !isUpdate ? (
+          <Pressable style={styles.captureCon} onPress={captureImage}>
+            <Text style={styles.captureTextStyle}> Capture Image</Text>
+          </Pressable>
+        ) : null}
+        {isImgLoading && (
+          <ActivityIndicator style={styles.loader} size="small" color="red" />
+        )}
+        {fileResponse || isUpdate ? (
+          <Image
+            source={{
+              uri: data.filePath,
+            }}
+            style={styles.images}
+            onLoadStart={() => setIsImgLoading(true)}
+            onLoadEnd={() => setIsImgLoading(false)}
+          />
+        ) : null}
+        {!loader ? null : (
+          <ActivityIndicator
+            style={styles.loder}
+            size={'large'}
+            color={'red'}
+          />
+        )}
         {data.title && data.subTitle ? (
           <Pressable
             onPress={taskAdded}
@@ -96,6 +181,11 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#404446',
   },
+  captureTextStyle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#404446',
+  },
   bodyStyle: {
     flex: 1,
     marginHorizontal: 20,
@@ -117,5 +207,23 @@ const styles = StyleSheet.create({
     color: '#72777A',
     fontSize: 16,
     fontWeight: '400',
+  },
+  images: {
+    height: 70,
+    width: 70,
+    borderRadius: 20,
+    marginTop: 30,
+  },
+  captureCon: {
+    backgroundColor: 'gray',
+    marginTop: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+  },
+  loader: {
+    position: 'absolute',
+    left: 20,
+    marginTop: 250,
   },
 });

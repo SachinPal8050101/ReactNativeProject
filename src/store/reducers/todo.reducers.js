@@ -17,6 +17,7 @@ const todoReducer = (state = initialState, action) => {
         title: action.payload.title,
         subTitle: action.payload.subTitle,
         isCompleted: false,
+        filePath: action.payload.filePath,
       };
       return {
         ...state,

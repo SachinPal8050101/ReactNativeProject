@@ -1,30 +1,36 @@
-const BASE_URL = 'https://chimpu.xyz/';
-
-export const getPhoneNumberInfo = (
-  number,
+export const uploadImageToServer = (
+  fileRes,
   callBackSuccess,
   callBackfailure,
 ) => {
-  const headers = {
-    'Content-Type': 'application/json',
-  };
-  const body = JSON.stringify({
-    phonenumber: '9761710753',
+  const formData = new FormData();
+  const data = JSON.stringify({
+    auth: {
+      api_key: '6cd1b8e5b2849269b2e27d0e13cd391d',
+      api_secret: '5636d8944dc398db23a6ef220134c575504cb6d8',
+    },
+    wait: true,
   });
-  console.log('sdsd');
-  fetch(`${BASE_URL}api/post.php`, {
+  formData.append('data', data);
+  formData.append('upload', {
+    uri: fileRes.assets[0].uri,
+    type: fileRes.assets[0].type,
+    name: fileRes.assets[0].fileName,
+  });
+  console.log('sdasdasda', formData);
+  fetch('https://api.kraken.io/v1/upload', {
     method: 'POST',
-    headers: headers,
-    body: body,
+    body: formData,
   })
     .then(async response => {
+      console.log('=====>>><<<<111', response);
       if (!response.ok) {
+        console.log('=====>>><<<<', JSON.stringify(response));
         callBackfailure({msg: 'Something Whet wrong', error: true});
         return false;
       }
       const data = await response.json();
-      const phoneOrigen = response.headers.get('phoneorigen');
-      callBackSuccess(data, phoneOrigen);
+      callBackSuccess(data);
     })
     .catch(async error => {
       const errorData = await error.response.json();

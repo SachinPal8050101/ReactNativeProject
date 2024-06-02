@@ -12,7 +12,7 @@ const ToDoScreen = props => {
   const todoList = useSelector(state => state.todos);
 
   const renderToDoItem = ({item, index}) => {
-    const {title = '', subTitle = '', isCompleted, id} = item;
+    const {title = '', subTitle = '', isCompleted, id, filePath} = item;
     return (
       <ToDoItem
         id={id}
@@ -21,6 +21,7 @@ const ToDoScreen = props => {
         title={title}
         subTitle={subTitle}
         onPress={taskId => navigateToCreateScreen(true, taskId)}
+        filePath={filePath}
       />
     );
   };
